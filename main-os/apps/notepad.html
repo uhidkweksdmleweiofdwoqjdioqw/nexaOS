@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notepad App</title>
+<style>
+    body {
+        font-family: 'Source Sans Pro', Arial, sans-serif;
+    }
+    #editor-container {
+        position: relative;
+        width: 100%;
+    }
+    #editor {
+        width: 100%;
+        height: 300px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .btn-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    button {
+        padding: 8px 16px;
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        font-family: 'Source Sans Pro', Arial, sans-serif;
+    }
+    button:hover {
+        background-color: #eee;
+    }
+    .menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 5px 0;
+        display: none;
+    }
+    .menu button {
+        display: block;
+        width: 100%;
+        padding: 5px 10px;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        font-family: 'Source Sans Pro', Arial, sans-serif;
+    }
+    .submenu {
+        display: none;
+    }
+    .submenu button {
+        padding: 5px 10px;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        font-family: 'Source Sans Pro', Arial, sans-serif;
+    }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&display=swap">
+</head>
+<body>
+<div id="editor-container">
+    <div class="btn-container">
+        <button id="editBtn">Edit</button>
+        <div class="menu" id="editMenu">
+            <button id="cutBtn">Cut</button>
+            <button id="copyBtn">Copy</button>
+            <button id="pasteBtn">Paste</button>
+        </div>
+        <button id="formatBtn">Format</button>
+        <div class="menu" id="formatMenu">
+            <button id="textSizeBtn">Text Size</button>
+            <button id="fontBtn">Font</button>
+            <button id="weightBtn">Weight</button>
+        </div>
+        <div class="submenu" id="fontSubMenu">
+            <button id="timesBtn">Times New Roman</button>
+            <button id="helveticaBtn">Helvetica</button>
+            <button id="robotoBtn">Roboto</button>
+            <button id="sourceSansBtn">Source Sans 3</button>
+        </div>
+        <button id="optionsBtn">Options</button>
+    </div>
+    <div id="editor" contenteditable="true"></div>
+</div>
+
+<script>
+    const editor = document.getElementById('editor');
+    const editBtn = document.getElementById('editBtn');
+    const editMenu = document.getElementById('editMenu');
+    const cutBtn = document.getElementById('cutBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
+    const formatBtn = document.getElementById('formatBtn');
+    const formatMenu = document.getElementById('formatMenu');
+    const textSizeBtn = document.getElementById('textSizeBtn');
+    const fontBtn = document.getElementById('fontBtn');
+    const weightBtn = document.getElementById('weightBtn');
+    const fontSubMenu = document.getElementById('fontSubMenu');
+    const timesBtn = document.getElementById('timesBtn');
+    const helveticaBtn = document.getElementById('helveticaBtn');
+    const robotoBtn = document.getElementById('robotoBtn');
+    const sourceSansBtn = document.getElementById('sourceSansBtn');
+    const optionsBtn = document.getElementById('optionsBtn');
+    const previewCheckbox = document.createElement('input');
+    previewCheckbox.type = 'checkbox';
+    previewCheckbox.id = 'previewCheckbox';
+    const label = document.createElement('label');
+    label.htmlFor = 'previewCheckbox';
+    label.textContent = 'Preview HTML';
+    optionsBtn.appendChild(previewCheckbox);
+    optionsBtn.appendChild(label);
+
+    editBtn.addEventListener('click', function() {
+        toggleMenu(editMenu);
+    });
+
+    cutBtn.addEventListener('click', function() {
+        document.execCommand('cut');
+    });
+
+    copyBtn.addEventListener('click', function() {
+        document.execCommand('copy');
+    });
+
+    pasteBtn.addEventListener('click', function() {
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+
+        const pasteDiv = document.createElement('div');
+        pasteDiv.contentEditable = true;
+        document.body.appendChild(pasteDiv);
+
+        pasteDiv.focus();
+        document.execCommand('paste');
+
+        const pastedText = pasteDiv.innerText;
+        range.insertNode(document.createTextNode(pastedText));
+
+        document.body.removeChild(pasteDiv);
+    });
+
+    formatBtn.addEventListener('click', function() {
+        toggleMenu(formatMenu);
+    });
+
+    textSizeBtn.addEventListener('click', function() {
+        // Add logic to change text size
+        alert('Text Size');
+    });
+
+    fontBtn.addEventListener('click', function() {
+        toggleSubMenu(fontSubMenu);
+    });
+
+    weightBtn.addEventListener('click', function() {
+        // Add logic to change font weight
+        alert('Font Weight');
+    });
+
+    timesBtn.addEventListener('click', function() {
+        setFont('Times New Roman');
+    });
+
+    helveticaBtn.addEventListener('click', function() {
+        setFont('Helvetica');
+    });
+
+    robotoBtn.addEventListener('click', function() {
+        setFont('Roboto');
+    });
+
+    sourceSansBtn.addEventListener('click', function() {
+        setFont('Source Sans 3');
+    });
+
+    optionsBtn.addEventListener('click', function() {
+        // Toggle HTML preview
+        const previewDiv = document.getElementById('previewDiv');
+        if (previewCheckbox.checked) {
+            previewDiv.style.display = 'block';
+            previewDiv.textContent = editor.innerHTML;
+        } else {
+            previewDiv.style.display = 'none';
+        }
+    });
+
+    function toggleMenu(menu) {
+        const menus = document.querySelectorAll('.menu');
+        menus.forEach(menu => {
+            if (menu !== editMenu && menu !== formatMenu) {
+                menu.style.display = 'none';
+            }
+        });
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function toggleSubMenu(subMenu) {
+        const subMenus = document.querySelectorAll('.submenu');
+        subMenus.forEach(subMenu => {
+            if (subMenu !== fontSubMenu) {
+                subMenu.style.display = 'none';
+            }
+        });
+        subMenu.style.display = (subMenu.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function setFont(fontName) {
+        editor.style.fontFamily = fontName;
+        toggleSubMenu(fontSubMenu);
+    }
+</script>
+</body>
+</html>
